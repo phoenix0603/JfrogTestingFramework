@@ -53,7 +53,7 @@ public class MetadataFileCalculation {
 
     @And("^I see that package contains <\"([^\"]*)\"> records$")
     public void iSeeThatPackageContainsRecords(String arg0) throws Throwable {
-        Assert.assertTrue(filesBeforeUloading.size()==Integer.parseInt(arg0));
+        Assert.assertTrue("Size is not expected. Curent size is "+ filesBeforeUloading.size(),filesBeforeUloading.size()==Integer.parseInt(arg0));
     }
     public String timeOfStart;
     @And("^I upload <\"([^\"]*)\"> additional files from <\"([^\"]*)\"> file$")
