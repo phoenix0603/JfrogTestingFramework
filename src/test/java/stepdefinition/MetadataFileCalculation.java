@@ -59,11 +59,13 @@ public class MetadataFileCalculation {
     @And("^I upload <\"([^\"]*)\"> additional files from <\"([^\"]*)\"> file$")
     public void iUploadAdditionalFilesFromFile(String arg0, String arg1) throws Throwable {
         timeOfStart= commonMethods.uploadFilesToArtifactory();
+
     }
 
     @And("^I download ZIP archive with (\\d+) debian packages from cloud artifactory$")
     public void iDownloadZIPArchiveWithDebianPackagesFromCloudArtifactory(int arg0) throws Throwable {
         commonMethods.downloadZipWith100FilesFromArtifactory();
+        commonMethods.removeFilesAndFolder();
         commonMethods.unZipFile("100.zip","Zip");
     }
 

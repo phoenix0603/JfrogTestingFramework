@@ -3,6 +3,7 @@ package helpers;
 import clients.RestClients;
 import com.jayway.restassured.response.Response;
 import entities.Repositories.RepositoryTreeBrowserResponse;
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 
 import java.io.*;
@@ -252,5 +253,14 @@ public class CommonMethods {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
+    }
+    public void  removeFilesAndFolder(){
+
+        try {
+            FileUtils.deleteDirectory(new File("uncompressed/"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
