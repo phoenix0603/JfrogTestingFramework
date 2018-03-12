@@ -12,25 +12,30 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
-public class restClients {
+import static helpers.GlobalValues.configuration;
+
+public class RestClients {
 
     HttpHeaders headers; // should be modified to accesible and updatable property
     RestTemplate restTemplate;
 
-    public restClients(){
+    public RestClients(){
         ClientHttpRequestFactory requestFactory = getClientHttpRequestFactory();
         restTemplate = new RestTemplate(requestFactory);
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>();
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        // Note: here we are making this converter to process any kind of restClients,
+        // Note: here we are making this converter to process any kind of RestClients,
         // not only application/*json, which is the default behaviour
         converter.setSupportedMediaTypes(Arrays.asList(MediaType.ALL));
         messageConverters.add(converter);
         restTemplate.setMessageConverters(messageConverters);
         headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("Authorization","Basic "+ Base64.getEncoder().encodeToString((configuration.getUsers().getAdmin().getUserName()+":"+configuration.getUsers().getAdmin().getPassword()).getBytes()));
+
     }
 
     public boolean is200OnGetRequest(String url){

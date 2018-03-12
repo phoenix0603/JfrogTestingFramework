@@ -26,7 +26,7 @@ public class BeforeAfter  {
     }
 
     /**
-     * This method returns user to homepage after each scenario
+     * This method returns Admin to homepage after each scenario
      * Also it reverts the state of courses, for an example deleting test
      * that was created during test
      */
