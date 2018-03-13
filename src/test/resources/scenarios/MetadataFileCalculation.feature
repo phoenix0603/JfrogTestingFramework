@@ -5,7 +5,7 @@ Feature: Metadata calculation time
     Scenario: Debian upload
      Given Artifactory instance is UP
      #And I download all available <"debian"> packages in <"ubuntu"> repository
-     #And I see that package contains <"102496"> records
+     #And I see that package contains <"486944"> records
      And I download ZIP archive with 100 debian packages from cloud artifactory
      And I upload <"100"> additional files from <"100.csv"> file
      #And I download all available <"debian"> packages in <"ubuntu"> repository

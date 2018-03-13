@@ -30,7 +30,6 @@ public class CommonMethods {
 
     public List<String> getAllPackagesMetadataFromRepo(String repositoryName) {
         try {
-            List<String> duplicates = new ArrayList<>();
             List<String> filesFromMetadata = new ArrayList<>();
             List<String> packages = new ArrayList<>();
             scanPackages("dists", packages);
