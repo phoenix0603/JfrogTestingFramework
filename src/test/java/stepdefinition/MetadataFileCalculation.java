@@ -75,8 +75,9 @@ public class MetadataFileCalculation {
 
     }
 
-    @Then("^I count time from the begining of file uploading to the end of metadata calculation$")
-    public void iCountTimeFromTheBeginingOfFileUploadingToTheEndOfMetadataCalculation() throws Throwable {
+
+    @Then("^I count time from the begining of file uploading to the end of metadata calculation and  count time which was spent on metadata calculation$")
+    public void iCountTimeFromTheBeginingOfFileUploadingToTheEndOfMetadataCalculationAndCountTimeWhichWasSpentOnMetadataCalculation() throws Throwable {
         commonMethods.getTimeOfLastMetadataCalculation(timeOfStart);
 
     }
