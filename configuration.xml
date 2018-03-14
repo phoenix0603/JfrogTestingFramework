@@ -1,5 +1,5 @@
 <configuration>
-    <artifactoryUrl>http://130.211.100.240:8081/artifactory</artifactoryUrl>
+    <artifactoryUrl>http://35.189.195.247:8081/artifactory</artifactoryUrl>
     <artifactoryDefaultRepository>ubuntu</artifactoryDefaultRepository>
     <users>
         <admin>

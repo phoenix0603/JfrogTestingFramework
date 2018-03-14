@@ -146,7 +146,7 @@ public class CommonMethods {
                 String[] params = data.split(",");
                 File initialFile = new File("uncompressed/" + params[0]);
                 InputStream targetStream = new FileInputStream(initialFile);
-
+                OutputStream outputStream = null;
 
                 java.net.URL url = new java.net.URL(configuration.getArtifactoryUrl() + "/" + configuration.getArtifactoryDefaultRepository() + "/" + params[0] + ";deb.distribution=" + params[1] + ";deb.component=" + params[2] + ";deb.architecture=" + params[3]);
                 java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
@@ -156,6 +156,11 @@ public class CommonMethods {
                 String authorization = "Basic " + new String(new org.apache.commons.codec.binary.Base64().encode((configuration.getUsers().getAdmin().getUserName()+":"+configuration.getUsers().getAdmin().getPassword()).getBytes()));
                 conn.setRequestMethod("PUT");
                 conn.setRequestProperty("Authorization", authorization);
+                conn.setRequestProperty("Content-Length",String.valueOf(fileContents.length));
+                conn.connect();
+                java.io.OutputStream out = conn.getOutputStream();
+                out.write(fileContents);
+                out.close();
 
                 if(conn.getResponseCode() != 201)
                 {
@@ -167,6 +172,7 @@ public class CommonMethods {
                 }
                 i++;
             }
+            Thread.sleep(120000);
             return returnTimeValue;
         } catch (Exception e) {
             e.printStackTrace();
