@@ -5,6 +5,7 @@ import com.jayway.restassured.response.Response;
 import entities.Repositories.RepositoryTreeBrowserResponse;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
+import org.omg.CORBA.TIMEOUT;
 
 import java.io.*;
 import java.nio.file.*;
@@ -134,45 +135,78 @@ public class CommonMethods {
         }
     }
 
+    public void deleteFilesFromRepo() {
+        List<String> filesPath;
+        try (Stream<String> stream = Files.lines(Paths.get("100.csv"))) {
+            filesPath = stream.collect(Collectors.toList());
+            int deletedCount =0;
+            int notFoundCount = 0;
+            for (String data : filesPath
+                    ) {
+                String[] params = data.split(",");
+                String authorization = "Basic " + new String(new org.apache.commons.codec.binary.Base64().encode((configuration.getUsers().getAdmin().getUserName() + ":" + configuration.getUsers().getAdmin().getPassword()).getBytes()));
+                java.net.URL url = new java.net.URL(configuration.getArtifactoryUrl() + "/" + configuration.getArtifactoryDefaultRepository() + "/" + params[0]);
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Authorization", authorization);
+                conn.setRequestMethod("DELETE");
+                conn.connect();
+                if(conn.getResponseCode()/100==2){
+                    deletedCount++;
+                    System.out.println("File "+ params[0] + " deleted.");
+                }else if (conn.getResponseCode()==404){
+                    notFoundCount++;
+                    System.out.println("File "+ params[0] + " not found.");
+                }else {
+                    Assert.fail("Error. File " + params[0] + " wasn't deleted. Response code: " + conn.getResponseCode());
+                }
+
+            }
+            System.out.println("Total files: " + (deletedCount+notFoundCount) + " Deleted files: " + deletedCount + " Not Found Files: " +notFoundCount);
+        } catch (Exception e) {
+
+        }
+    }
+
     public String uploadFilesToArtifactory() {
         List<String> filesPath = new ArrayList<>();
         try (Stream<String> stream = Files.lines(Paths.get("100.csv"))) {
-            String returnTimeValue="";
+            String returnTimeValue = "";
             filesPath = stream.collect(Collectors.toList());
 
-            int i=0;
+            int i = 0;
             for (String data : filesPath
                     ) {
                 String[] params = data.split(",");
                 File initialFile = new File("uncompressed/" + params[0]);
                 InputStream targetStream = new FileInputStream(initialFile);
-                OutputStream outputStream = null;
-
                 java.net.URL url = new java.net.URL(configuration.getArtifactoryUrl() + "/" + configuration.getArtifactoryDefaultRepository() + "/" + params[0] + ";deb.distribution=" + params[1] + ";deb.component=" + params[2] + ";deb.architecture=" + params[3]);
                 java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
                 conn.setDoOutput(true);
 
-                byte [] fileContents = org.apache.commons.io.IOUtils.toByteArray(targetStream);
-                String authorization = "Basic " + new String(new org.apache.commons.codec.binary.Base64().encode((configuration.getUsers().getAdmin().getUserName()+":"+configuration.getUsers().getAdmin().getPassword()).getBytes()));
+                byte[] fileContents = org.apache.commons.io.IOUtils.toByteArray(targetStream);
+                String authorization = "Basic " + new String(new org.apache.commons.codec.binary.Base64().encode((configuration.getUsers().getAdmin().getUserName() + ":" + configuration.getUsers().getAdmin().getPassword()).getBytes()));
                 conn.setRequestMethod("PUT");
                 conn.setRequestProperty("Authorization", authorization);
-                conn.setRequestProperty("Content-Length",String.valueOf(fileContents.length));
+                conn.setRequestProperty("Content-Length", String.valueOf(fileContents.length));
                 conn.connect();
                 java.io.OutputStream out = conn.getOutputStream();
                 out.write(fileContents);
                 out.close();
 
-                if(conn.getResponseCode() != 201)
-                {
+                if (conn.getResponseCode() != 201) {
                     Assert.fail("File: " + params[0] + " wasnt uploaded.");
                 }
-                if(i==0){
-                  getLogFile();
-                  returnTimeValue =  getLastTimeFromArtifactoryLog();
+                if (i == 0) {
+                    getLogFile();
+                    returnTimeValue = getLastTimeFromArtifactoryLog();
                 }
                 i++;
+                System.out.println("File: " + params[0] + " uploaded. Size: " + fileContents.length + " byte(s).");
             }
-            Thread.sleep(120000);
+            final int TOMEOUT = 120000;
+            System.out.println("Uplading is finished. Waiting for " + TOMEOUT/1000 +" sec.");
+            Thread.sleep(TOMEOUT);
             return returnTimeValue;
         } catch (Exception e) {
             e.printStackTrace();
@@ -204,7 +238,7 @@ public class CommonMethods {
         try {
             Stream<String> stream = Files.lines(Paths.get("artifactory.log"));
             List<String> log = stream.collect(Collectors.toList());
-            return log.get(log.size() - 1).substring(0,23).trim();
+            return log.get(log.size() - 1).substring(0, 23).trim();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,34 +246,35 @@ public class CommonMethods {
         }
         return null;
     }
-    public void getTimeOfLastMetadataCalculation(String beginTime){
+
+    public void getTimeOfLastMetadataCalculation(String beginTime) {
 
         try {
             Stream<String> stream = Files.lines(Paths.get("artifactory.log"));
             List<String> log = stream.collect(Collectors.toList());
-            int i =0;
-            for (String str: log
-                 ) {
+            int i = 0;
+            for (String str : log
+                    ) {
 
-                if(str.startsWith(beginTime)){
+                if (str.startsWith(beginTime)) {
                     break;
                 }
                 i++;
 
             }
-            List<String> newLog = log.subList(i,log.size());
-            String endTime = newLog.get(newLog.size()-1).substring(0,23);
+            List<String> newLog = log.subList(i, log.size());
+            String endTime = newLog.get(newLog.size() - 1).substring(0, 23);
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
 
             Date d1 = null;
             Date d2 = null;
 
 
-                d1 = format.parse(beginTime);
-                d2 = format.parse(endTime);
+            d1 = format.parse(beginTime);
+            d2 = format.parse(endTime);
 
-                //in milliseconds
-                long diff = d2.getTime() - d1.getTime();
+            //in milliseconds
+            long diff = d2.getTime() - d1.getTime();
 
             Pattern pattern = Pattern.compile("took (\\d*) ms");
             Integer time = 0;
@@ -248,18 +283,19 @@ public class CommonMethods {
 
                 Matcher matcher = pattern.matcher(str);
                 while (matcher.find()) {
-                   time += Integer.parseInt(matcher.group(1));
+                    time += Integer.parseInt(matcher.group(1));
                 }
 
             }
-            Assert.assertTrue("Time from start to end is "+ diff +" ms. Summ of calculation time is " + time +" ms.",true);
-            System.out.println("Time from start to end is "+ diff +" ms. Summ of calculation time is " + time +" ms.");
-        }catch (Exception e){
+            Assert.assertTrue("Time from start to end is " + diff + " ms. Summ of calculation time is " + time + " ms.", true);
+            System.out.println("Time from start to end is " + diff + " ms. Summ of calculation time is " + time + " ms.");
+        } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         }
     }
-    public void  removeFilesAndFolder(){
+
+    public void removeFilesAndFolder() {
 
         try {
             FileUtils.deleteDirectory(new File("uncompressed/"));

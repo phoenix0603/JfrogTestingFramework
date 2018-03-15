@@ -58,6 +58,7 @@ public class MetadataFileCalculation {
     public String timeOfStart;
     @And("^I upload <\"([^\"]*)\"> additional files from <\"([^\"]*)\"> file$")
     public void iUploadAdditionalFilesFromFile(String arg0, String arg1) throws Throwable {
+        commonMethods.deleteFilesFromRepo();
         timeOfStart= commonMethods.uploadFilesToArtifactory();
 
     }
